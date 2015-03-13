@@ -111,7 +111,7 @@ function convertDocumentToRmarkdown(document, destination_folder) {
   var Rmd_filename = document.getName()+".Rmd";
   var image_foldername = document.getName()+"_images";
   var inSrc = false;
-  var inClass = false;
+  var inChunk = false;
   var globalImageCounter = 0;
   var globalListCounters = {};
   // edbacher: added a variable for indent in src <pre> block. Let style sheet do margin.
@@ -139,13 +139,13 @@ function convertDocumentToRmarkdown(document, destination_folder) {
       } else if (result.source==="end" && inSrc) {
         inSrc=false;
         text+="</pre>\n\n";
-      } else if (result.inClass==="start" && !inClass) {
-        inClass=true;
+      } else if (result.inChunk==="start" && !inChunk) {
+        inChunk=true;
         text+="```{"+result.className+"}\n";
-      } else if (result.inClass==="end" && inClass) {
-        inClass=false;
+      } else if (result.inChunk==="end" && inChunk) {
+        inChunk=false;
         text+="```\n\n";
-      } else if (inClass) {
+      } else if (inChunk) {
         text+=result.text+"\n\n";
       } else if (inSrc) {
         text+=(srcIndent+escapeHTML(result.text)+"\n");
@@ -303,13 +303,13 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     result.sourcePretty = "start";
   } else if (/^\s*---\s+src\s*$/.test(pOut) || /^\s*---\s+source code\s*$/.test(pOut)) {
     result.source = "start";
-  } else if (/^\s*---\s?+\{\s?+([^ ]+)\}\s*?$/.test(pOut)) {
-    result.inClass = "start";
+  } else if (/^\s*---\s+chunk\s+([^ ]+)\s*$/.test(pOut)) {
+    result.inChunk = "start";
     result.className = RegExp.$1;
   } else if (/^\s*---\s*$/.test(pOut)) {
     result.source = "end";
     result.sourcePretty = "end";
-    result.inClass = "end";
+    result.inChunk = "end";
   } else if (/^\s*---\s+jsperf\s*([^ ]+)\s*$/.test(pOut)) {
     result.text = '<iframe style="width: 100%; height: 340px; overflow: hidden; border: 0;" '+
                   'src="http://www.html5rocks.com/static/jsperfview/embed.html?id='+RegExp.$1+
@@ -323,8 +323,8 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
       pOut += processTextElement(inSrc, textElements[i]);
     }
 
-    // replace Unicode quotation marks
-    pOut = pOut.replace('\u201d', '"').replace('\u201c', '"');
+    // replace Unicode quotation marks (double and single)
+    pOut = pOut.replace(/\u2018|\u2019/g,"'").replace(/\u201c|\u201d/g, '"');
  
     result.text = prefix+pOut;
   }
