@@ -209,6 +209,10 @@ function escapeHTML(text) {
   return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function standardQMarks(text) {
+  return text.replace(/\u2018|\u8216|\u2019|\u8217/g,"'").replace(/\u201c|\u8220|\u201d|\u8221/g, '"')
+}
+
 // Process each child element (not just paragraphs).
 function processParagraph(index, element, inSrc, imageCounter, listCounters, image_path) {
   // First, check for things that require no processing.
@@ -303,9 +307,9 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     result.sourcePretty = "start";
   } else if (/^\s*---\s+src\s*$/.test(pOut) || /^\s*---\s+source code\s*$/.test(pOut)) {
     result.source = "start";
-  } else if (/^\s*---\s+chunk\s+([^ ]+)\s*$/.test(pOut)) {
+  } else if (/^\s*---\s+chunk\s+(.+)\s*$/.test(pOut)) {
     result.inChunk = "start";
-    result.className = RegExp.$1;
+    result.className = standardQMarks(RegExp.$1);
   } else if (/^\s*---\s*$/.test(pOut)) {
     result.source = "end";
     result.sourcePretty = "end";
@@ -324,7 +328,7 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     }
 
     // replace Unicode quotation marks (double and single)
-    pOut = pOut.replace(/\u2018|\u8216|\u2019|\u8217/g,"'").replace(/\u201c|\u8220|\u201d|\u8221/g, '"');
+    pOut = standardQMarks(pOut);
  
     result.text = prefix+pOut;
   }
