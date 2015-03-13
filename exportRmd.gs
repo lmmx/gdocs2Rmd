@@ -124,7 +124,7 @@ function convertDocumentToRmarkdown(document, destination_folder) {
   // Walk through all the child elements of the doc.
   for (var i = 0; i < numChildren; i++) {
     var child = document.getActiveSection().getChild(i);
-    var result = processParagraph(i, child, inSrc, globalImageCounter, globalListCounters, image_prefix + image_foldername);
+    var result = processParagraph(i, child, inSrc, inChunk, globalImageCounter, globalListCounters, image_prefix + image_foldername);
     globalImageCounter += (result && result.images) ? result.images.length : 0;
     if (result!==null) {
       if (result.sourcePretty==="start" && !inSrc) {
@@ -141,12 +141,16 @@ function convertDocumentToRmarkdown(document, destination_folder) {
         text+="</pre>\n\n";
       } else if (result.inChunk==="start" && !inChunk) {
         inChunk=true;
-        text+="```{"+result.className+"}\n";
+        if (result.className==='') {
+          text+="```{r}\n";
+        } else {
+          text+="```{r "+result.className+"}\n";
+        }
       } else if (result.inChunk==="end" && inChunk) {
         inChunk=false;
         text+="```\n\n";
       } else if (inChunk) {
-        text+=result.text+"\n\n";
+        text+=result.text+"\n";
       } else if (inSrc) {
         text+=(srcIndent+escapeHTML(result.text)+"\n");
       } else if (result.text && result.text.length>0) {
@@ -214,7 +218,7 @@ function standardQMarks(text) {
 }
 
 // Process each child element (not just paragraphs).
-function processParagraph(index, element, inSrc, imageCounter, listCounters, image_path) {
+function processParagraph(index, element, inSrc, inChunk, imageCounter, listCounters, image_path) {
   // First, check for things that require no processing.
   if (element.getNumChildren()==0) {
     return null;
@@ -307,13 +311,14 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     result.sourcePretty = "start";
   } else if (/^\s*---\s+src\s*$/.test(pOut) || /^\s*---\s+source code\s*$/.test(pOut)) {
     result.source = "start";
-  } else if (/^\s*---\s+chunk\s+(.+)\s*$/.test(pOut)) {
+  } else if (/^\s*~~~\s*$/.test(pOut) && typeof(inChunk) !== 'undefined' && inChunk) {
+    result.inChunk = "end";
+  } else if (/^\s*~~~\s*(.*)\s*$/.test(pOut)) {
     result.inChunk = "start";
     result.className = standardQMarks(RegExp.$1);
   } else if (/^\s*---\s*$/.test(pOut)) {
     result.source = "end";
     result.sourcePretty = "end";
-    result.inChunk = "end";
   } else if (/^\s*---\s+jsperf\s*([^ ]+)\s*$/.test(pOut)) {
     result.text = '<iframe style="width: 100%; height: 340px; overflow: hidden; border: 0;" '+
                   'src="http://www.html5rocks.com/static/jsperfview/embed.html?id='+RegExp.$1+
