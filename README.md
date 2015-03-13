@@ -3,7 +3,7 @@ gdocs2Rmd
 
 A simple Google Apps script to convert a properly formatted Google Drive Document to the Rmarkdown (.Rmd) format. Fork of the gdocs2md repository — there've been many (180 at time of writing!), and some collation of changes between them could be valuable.
 
-*NB* there's no code change from the markdown version yet. To consider:
+To consider:
 
 * Would this actually be best outputting md or Rmd format?
 * What value would code/YAML serve?
@@ -50,7 +50,7 @@ Related directions:
     * images are correctly extracted and sent as attachments
   * Blocks:
     * Table of contents is replaced by `[[TOC]]`
-    * blocks of text delimited by "--- class whateverclassnameyouwant" and "---" are converted to `<pre class="whateverclassnameyouwant"></pre>` 
+    * blocks of text delimited by `--- chunk chunkparameters` and `---` become fenced with <code>\`\`\` {chunkparameters}</code> and <code>```</code>
     * Source code: 
       * **UPDATED**: blocks of text delimited by "--- source code" or "--- src" and "---" are converted to `<pre></pre>`
       * **NEW**: blocks of text delimited by "--- source pretty" or "--- srcp" and "---" are converted to `<pre class="prettyprint"></pre>`
