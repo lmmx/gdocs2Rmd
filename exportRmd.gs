@@ -324,7 +324,7 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     }
 
     // replace Unicode quotation marks (double and single)
-    pOut = pOut.replace(/\u2018|\u2019/g,"'").replace(/\u201c|\u201d/g, '"');
+    pOut = pOut.replace(/\u2018|\u8216|\u2019|\u8217/g,"'").replace(/\u201c|\u8220|\u201d|\u8221/g, '"');
  
     result.text = prefix+pOut;
   }
