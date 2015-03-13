@@ -141,10 +141,10 @@ function convertDocumentToRmarkdown(document, destination_folder) {
         text+="</pre>\n\n";
       } else if (result.inClass==="start" && !inClass) {
         inClass=true;
-        text+="<pre class=\""+result.className+"\">\n";
+        text+="```{"+result.className+"}\n";
       } else if (result.inClass==="end" && inClass) {
         inClass=false;
-        text+="</pre>\n\n";
+        text+="```\n\n";
       } else if (inClass) {
         text+=result.text+"\n\n";
       } else if (inSrc) {
@@ -303,7 +303,7 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     result.sourcePretty = "start";
   } else if (/^\s*---\s+src\s*$/.test(pOut) || /^\s*---\s+source code\s*$/.test(pOut)) {
     result.source = "start";
-  } else if (/^\s*---\s+class\s+([^ ]+)\s*$/.test(pOut)) {
+  } else if (/^\s*---\s?+\{\s?+([^ ]+)\}\s*?$/.test(pOut)) {
     result.inClass = "start";
     result.className = RegExp.$1;
   } else if (/^\s*---\s*$/.test(pOut)) {
