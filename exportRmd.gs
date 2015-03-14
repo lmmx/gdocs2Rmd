@@ -49,24 +49,25 @@ function setupScript() {
   scriptProperties.setProperty("image_folder_prefix", "/images/");
 }
 
-function getDocComments(images) {
+function getDocComments(images, include_deleted) {
   var scriptProperties = PropertiesService.getScriptProperties();
   var document_id = scriptProperties.getProperty("document_id");
-  var comments_list = Drive.Comments.list(document_id);
+  get_deleted = (typeof(include_resolved) != 'undefined')
+  var comments_list = Drive.Comments.list(document_id,
+                                          {includeDeleted: get_deleted,
+                                           maxResults: 100 }); // 0 to 100, default 20
+  // See https://developers.google.com/drive/v2/reference/comments/list for more options
+  
   var comment_array = [];
   for (var i = 0; i < comments_list.items.length; i++) {
     var comment_text = comments_list.items[i].content;
  /*
-    Images is a generic parameter passed in as a switch to
+    images is a generic parameter passed in as a switch to
     return image URL-containing comments only.
     
-    If the images parameter isn't provided, (images == null) is true.
-    The following statement checks the opposite: whether the parameter *was* provided.
-    
-    NB (images === null) is overly strict only becoming true when the images
-       parameter was actually entered as null. So (images !== null) isn't used.
+    If the parameter is provided, it's no longer undefined.
  */
-    if (images != null) {
+    if (typeof(images) != 'undefined') {
       if (/(https?:\/\/.+?\.(png|gif|jpe?g))/.test(comment_text)) {
         comment_array.push(RegExp.$1);
       } // otherwise there's no image URL here, skip it
