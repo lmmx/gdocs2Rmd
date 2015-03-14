@@ -127,7 +127,7 @@ function convertSingleDoc() {
 
 function convertFolder() {
   var scriptProperties = PropertiesService.getScriptProperties(); 
-  var folder_id=scriptProperties.getProperty("folder_id");
+  var folder_id = scriptProperties.getProperty("folder_id");
   var source_folder = DriveApp.getFolderById(folder_id);
   var Rmarkdown_folders = source_folder.getFoldersByName("Rmarkdown");
   
@@ -149,7 +149,7 @@ function convertFolder() {
 
     var filename = gdoc_file.getName();    
     var Rmd_files = Rmarkdown_folder.getFilesByName(filename + ".Rmd");
-    var update_file = false
+    var update_file = false;
     
     if (Rmd_files.hasNext()) {
       var Rmd_file = Rmd_files.next();
