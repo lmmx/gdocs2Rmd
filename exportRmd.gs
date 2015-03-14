@@ -48,16 +48,19 @@ function setupScript() {
   }
   scriptProperties.setProperty("folder_id", folder_id);
   scriptProperties.setProperty("image_folder_prefix", "/images/");
+  scriptProperties.setProperty("comments", getDocComments());
 }
 
 function getDocComments() {
   var scriptProperties = PropertiesService.getScriptProperties();
-  var document_id=scriptProperties.getProperty("document_id");
-  var url = "https://www.googleapis.com/drive/v2/files/" + document_id + "/comments";
-  var oauth_token = ScriptApp.getOAuthToken();
-  var xhr = UrlFetchApp.getRequest(url, oauth_token); // total guesswork! Probably addOauthService?
-  var comments_doc = XmlService.parse(xhr);
-  var comments_root = comments_doc.getRootElement();
+  var document_id = scriptProperties.getProperty("document_id");
+  var comments_list = Drive.Comments.list(document_id);
+  var comment_array = [];
+  for (var i = 0; i < comments_list.items.length; i++) {
+    var comment_text = comments_list.items[i].content;
+    comment_array.push(comment_text);
+  }
+  return comment_array;
 }
 
 function convertSingleDoc() {
@@ -243,7 +246,7 @@ function processParagraph(index, element, inSrc, inChunk, imageCounter, listCoun
   if (element.getNumChildren()==0) {
     return null;
   }  
-  // Punt on TOC.
+  // Skip on TOC.
   if (element.getType() === DocumentApp.ElementType.TABLE_OF_CONTENTS) {
     return {"text": "[[TOC]]"};
   }
@@ -300,7 +303,7 @@ function processParagraph(index, element, inSrc, inChunk, imageCounter, listCoun
       blob.setName(name);
       
       imageCounter++;
-      textElements.push('![image alt text](' + image_path + '/' + name + ')');
+      textElements.push('![](' + image_path + '/' + name + ')');
       //result.images.push( {
       //  "bytes": blob.getBytes(), 
       //  "type": contentType, 
