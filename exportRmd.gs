@@ -25,9 +25,8 @@ function onOpen() {
 // In future:
 //  DocumentApp.getUi().createAddonMenu();
   DocumentApp.getUi().createMenu('Rmarkdown')
-      .addItem('Export → Rmd', 'convertSingleDoc')
-      .addItem('Export folder → Rmd', 'convertFolder')
-      .addItem('Get comments (experimental!)', 'getDocComments')
+      .addItem('Export \u2192 Rmd', 'convertSingleDoc')
+      .addItem('Export folder \u2192 Rmd', 'convertFolder')
       .addToUi();
 }
 
@@ -48,23 +47,43 @@ function setupScript() {
   }
   scriptProperties.setProperty("folder_id", folder_id);
   scriptProperties.setProperty("image_folder_prefix", "/images/");
-  scriptProperties.setProperty("comments", getDocComments());
 }
 
-function getDocComments() {
+function getDocComments(images) {
   var scriptProperties = PropertiesService.getScriptProperties();
   var document_id = scriptProperties.getProperty("document_id");
   var comments_list = Drive.Comments.list(document_id);
   var comment_array = [];
   for (var i = 0; i < comments_list.items.length; i++) {
     var comment_text = comments_list.items[i].content;
-    comment_array.push(comment_text);
+ /*
+    Images is a generic parameter passed in as a switch to
+    return image URL-containing comments only.
+    
+    If the images parameter isn't provided, (images == null) is true.
+    The following statement checks the opposite: whether the parameter *was* provided.
+    
+    NB (images === null) is overly strict only becoming true when the images
+       parameter was actually entered as null. So (images !== null) isn't used.
+ */
+    if (images != null) {
+      if (/(https?:\/\/.+?\.(png|gif|jpe?g))/.test(comment_text)) {
+        comment_array.push(RegExp.$1);
+      } // otherwise there's no image URL here, skip it
+    } else { 
+      comment_array.push(comment_text);
+    }
   }
   return comment_array;
 }
 
 function convertSingleDoc() {
   var scriptProperties = PropertiesService.getScriptProperties();
+  // renew comments list on every export
+  var doc_comments = getDocComments();
+  scriptProperties.setProperty("comments", doc_comments);
+  var image_urls = getDocComments("Image URLs");
+  scriptProperties.setProperty("image_srcs", image_urls);
   var folder_id=scriptProperties.getProperty("folder_id");
   var document_id=scriptProperties.getProperty("document_id");
   var source_folder = DriveApp.getFolderById(folder_id);
