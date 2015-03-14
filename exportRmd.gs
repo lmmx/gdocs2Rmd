@@ -4,7 +4,6 @@ Modified by clearf to add files to the google directory structure.
 Modified by lmmx to write Rmarkdown, with emphasis on chunks rather than HTML-rendering code.
 
 Usage: 
-  NB: don't use on top-level doc (in root Drive folder) See comment in setupScript function.
   Adding this script to your doc: 
     - Tools > Script Manager > New
     - Select "Blank Project", then paste this code in and save.
@@ -15,6 +14,22 @@ Usage:
     - Converted doc will be added to a "Rmarkdown" folder in the source document's directories. 
     - Images will be added to a subfolder of the "Rmarkdown" folder. 
 */
+
+function onInstall(e) {
+  onOpen(e);
+}
+
+function onOpen() {
+  // Add a menu with some items, some separators, and a sub-menu.
+  setupScript();
+// In future:
+//  DocumentApp.getUi().createAddonMenu();
+  DocumentApp.getUi().createMenu('Rmarkdown')
+      .addItem('Export → Rmd', 'convertSingleDoc')
+      .addItem('Export folder → Rmd', 'convertFolder')
+      .addItem('Get comments (experimental!)', 'getDocComments')
+      .addToUi();
+}
 
 function setupScript() {
   var scriptProperties = PropertiesService.getScriptProperties();
@@ -32,7 +47,17 @@ function setupScript() {
     var folder_id = folder.getId();
   }
   scriptProperties.setProperty("folder_id", folder_id);
-  scriptProperties.setProperty("image_folder_prefix", "/assets/images/");
+  scriptProperties.setProperty("image_folder_prefix", "/images/");
+}
+
+function getDocComments() {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var document_id=scriptProperties.getProperty("document_id");
+  var url = "https://www.googleapis.com/drive/v2/files/" + document_id + "/comments";
+  var oauth_token = ScriptApp.getOAuthToken();
+  var xhr = UrlFetchApp.getRequest(url, oauth_token); // total guesswork! Probably addOauthService?
+  var comments_doc = XmlService.parse(xhr);
+  var comments_root = comments_doc.getRootElement();
 }
 
 function convertSingleDoc() {
