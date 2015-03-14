@@ -26,15 +26,10 @@ function setupScript() {
   var doc_id = DocumentApp.getActiveDocument().getId();
   scriptProperties.setProperty("document_id", doc_id);
   var doc_parents = DriveApp.getFileById(doc_id).getParents();
-  if ( doc_parents == null ) {
-    var folder_id = null; // maybe this is right?
-  // TODO: check how to handle docs in root folder - would return null here but at least it's explicit
-  } else {
-    var folders = doc_parents;
-    while (folders.hasNext()) {
-      var folder = folders.next();
-      var folder_id = folder.getId();
-    }
+  var folders = doc_parents;
+  while (folders.hasNext()) {
+    var folder = folders.next();
+    var folder_id = folder.getId();
   }
   scriptProperties.setProperty("folder_id", folder_id);
   scriptProperties.setProperty("image_folder_prefix", "/assets/images/");
