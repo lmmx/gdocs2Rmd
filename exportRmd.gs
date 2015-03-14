@@ -49,15 +49,34 @@ function setupScript() {
   scriptProperties.setProperty("image_folder_prefix", "/images/");
 }
 
-function getDocComments(images, include_deleted) {
+function getDocComments(comment_list_args) {
+  if (typeof(comment_list_args) == 'undefined') {
+    var comment_list_args = {};
+  }
+
+  var possible_args = ['images', 'include_deleted'];
+  for (var i in possible_args) {
+    var possible_arg = possible_args[i];
+    if (comment_list_args.propertyIsEnumerable(possible_arg)) {
+      eval(possible_arg + " = " + comment_list_args[possible_arg]);
+    } else {
+      eval(possible_arg + " = " + false);
+    }
+  }
+  
+  /*
+  Looks bad but more sensible than repeatedly checking if arg undefined.
+  
+  Sets every variable named in the possible_args array to false if
+  it wasn't passed into the comment_list_args object.
+  */
+  
   var scriptProperties = PropertiesService.getScriptProperties();
   var document_id = scriptProperties.getProperty("document_id");
-  get_deleted = (typeof(include_resolved) != 'undefined')
   var comments_list = Drive.Comments.list(document_id,
-                                          {includeDeleted: get_deleted,
+                                          {includeDeleted: include_deleted,
                                            maxResults: 100 }); // 0 to 100, default 20
-  // See https://developers.google.com/drive/v2/reference/comments/list for more options
-  
+  // See https://developers.google.com/drive/v2/reference/comments/list for all options
   var comment_array = [];
   for (var i = 0; i < comments_list.items.length; i++) {
     var comment_text = comments_list.items[i].content;
@@ -67,7 +86,7 @@ function getDocComments(images, include_deleted) {
     
     If the parameter is provided, it's no longer undefined.
  */
-    if (typeof(images) != 'undefined') {
+    if (images) {
       if (/(https?:\/\/.+?\.(png|gif|jpe?g))/.test(comment_text)) {
         comment_array.push(RegExp.$1);
       } // otherwise there's no image URL here, skip it
@@ -78,19 +97,24 @@ function getDocComments(images, include_deleted) {
   return comment_array;
 }
 
+function getImageComments() {
+  // for testing/maybe easy shorthand
+  getDocComments({images: true});
+}
+
 function convertSingleDoc() {
   var scriptProperties = PropertiesService.getScriptProperties();
   // renew comments list on every export
   var doc_comments = getDocComments();
+  var image_urls = getDocComments({images: true}); // NB assumed false - any value will do
   scriptProperties.setProperty("comments", doc_comments);
-  var image_urls = getDocComments("Image URLs");
   scriptProperties.setProperty("image_srcs", image_urls);
-  var folder_id=scriptProperties.getProperty("folder_id");
-  var document_id=scriptProperties.getProperty("document_id");
+  var folder_id = scriptProperties.getProperty("folder_id");
+  var document_id = scriptProperties.getProperty("document_id");
   var source_folder = DriveApp.getFolderById(folder_id);
   var Rmarkdown_folders = source_folder.getFoldersByName("Rmarkdown");
 
-   var Rmarkdown_folder; 
+  var Rmarkdown_folder; 
   if (Rmarkdown_folders.hasNext()) { 
     Rmarkdown_folder = Rmarkdown_folders.next();
   } else { 
