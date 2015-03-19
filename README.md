@@ -50,7 +50,7 @@ Related directions:
     * images are correctly extracted and sent as attachments
   * Blocks:
     * Table of contents is replaced by `[[TOC]]`
-    * blocks of text delimited by `--- chunk chunkparameters` and `---` become fenced as in Rmarkdown, with <code>\`\`\` {chunkparameters}</code> and <code>\`\`\`</code>. Note the `{}` brackets are added automatically.
+    * blocks of text delimited by `~~~ chunkparameters` and `~~~` become fenced as in Rmarkdown, with <code>\`\`\` {chunkparameters}</code> and <code>\`\`\`</code>. Note the `{}` brackets are added automatically.
     * Source code: 
       * **UPDATED**: blocks of text delimited by "--- source code" or "--- src" and "---" are converted to `<pre></pre>`
       * **NEW**: blocks of text delimited by "--- source pretty" or "--- srcp" and "---" are converted to `<pre class="prettyprint"></pre>`
