@@ -35,7 +35,7 @@ Related directions:
     - The first run will require you to authorize the app.
     - Converted doc will be saved in the Markdown sub-directory, images below that (`/assets/images`).
 
-*NB* don't use on a top-level document (that is, in the root Drive folder). See my comment in the setupScript function.
+*NB* I'm testing UI etc. in a [markdown](https://github.com/lmmx/gdocs2md-html/)/HTML equivalent before adding changes here. Check that repo out if this interests you. HTML below is from previous implementations and will get taken out of the Rmd-generating script.
 
 ## Interpreted formats
   * Text:
